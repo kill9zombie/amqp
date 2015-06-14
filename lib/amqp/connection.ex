@@ -105,6 +105,26 @@ defmodule AMQP.Connection do
     :amqp_connection.close(conn.pid)
   end
 
+  @doc """
+  Register a blocked connection handler.
+
+  From the Erlang client user guide:
+
+   When an AMQP broker is running low on resources, for example by hitting a memory high watermark,
+   it may choose to stop reading from publishers' network sockets.
+
+   RabbitMQ introduces a mechanism to allow clients to be told this has taken place - 
+   invoke amqp_connection:register_blocked_handler/2 giving the pid of a process to which 
+   #'connection.blocked'{} and #'connection.unblocked'{} messages may be sent. 
+
+  See:
+    http://www.rabbitmq.com/connection-blocked.html
+    http://www.rabbitmq.com/erlang-client-user-guide.html
+  """
+  def register_blocked_handler(conn, handler) do
+    :amqp_connection.register_blocked_handler(conn.pid, handler)
+  end
+
   defp do_open(amqp_params) do
     case :amqp_connection.start(amqp_params) do
       {:ok, pid} -> {:ok, %Connection{pid: pid}}
